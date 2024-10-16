@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .orderPage {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Black box shadow */
+        }
+        h1 {
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+        h2 {
+            color: green;
+        }
+
+        /* Styles for odd rows */
+        .orderItems > :nth-child(odd) {
+            cursor: auto;
+            background-color: rgba(215, 208, 208, 0.6);
+        }
+
+        /* Styles for even rows */
+        .orderItems > :nth-child(even) {
+            background-color: #eee1; /* Change this color as needed */
+        }
+
+        .orderPage h1 {
+            margin-bottom: 20px;
+        }
+
+        .orderItems {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .orderItems .item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .orderItems .item .image img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .orderItems .item .name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .orderItems .item .quantity,
+        .orderItems .item .totalPrice {
+            width: 100px;
+            text-align: center;
+        }
+
+        .total {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+            color: red;
+        }
+
+        /* Review Section Styles */
+        .reviewSection {
+            margin-top: 40px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Black box shadow */
+        }
+
+        .reviewSection h2 {
+            margin-top: 0;
+        }
+
+        #reviewText {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        #reviewText:focus {
+            outline: none;
+            border-color: blue; /* Example focus color */
+        }
+
+        #reviewForm button {
+            padding: 10px 20px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #reviewForm button:hover {
+            background-color: darkgreen;
+        }
+
+        #reviewList {
+            margin-top: 20px;
+        }
+
+        #reviewList div {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Adding shadow to each review */
+        }
+    </style>
+</head>
+<body>
+    <div class="orderPage">
+        <h1>YOUR ORDERS</h1>
+        <h2>Order placed successfully</h2>
+        
+        <div class="orderItems">
+            <!-- Order items will be dynamically added here -->
+        </div>
+        
+        <div class="reviewSection">
+            <h2>Add a Review</h2>
+            <form id="reviewForm">
+                <textarea id="reviewText" rows="4" cols="50" placeholder="Write your review here"></textarea><br>
+                <button type="submit">Submit Review</button>
+            </form>
+            <div id="reviewList">
+                <!-- Reviews will be dynamically added here -->
+            </div>
+        </div>
+        
+        <a href="home.html">Return to home</a>
+    </div>
+
+    <script>
+        let listCartHTML = document.querySelector('.listCart');
+        let cart = [];
+
+        const addCartToHTML = () => {
+            const orderItems = document.querySelector('.orderItems');
+            orderItems.innerHTML = '';
+            let totalPrice = 0;
+            if(cart.length > 0){
+                cart.forEach(item => {
+                    let positionProduct = products.findIndex((value) => value.id == item.product_id);
+                    let info = products[positionProduct];
+                    let numberString = info.price;
+                    let numberWithoutComma = numberString.replace(/,/g, "");
+                    let formattedPrice = (numberWithoutComma * item.quantity).toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
+                    totalPrice += numberWithoutComma * item.quantity;
+                    let newItem = document.createElement('div');
+                    newItem.classList.add('item');
+                    newItem.innerHTML = `
+                        <div class="image">
+                            <img src="${info.image}">
+                        </div>
+                        <div class="name">${info.name}</div>
+                        <div class="quantity">${item.quantity}</div>
+                        <div class="totalPrice">${formattedPrice}</div>
+                    `;
+                    orderItems.appendChild(newItem);
+                });
+            }
+            orderItems.innerHTML += `<div class="total">Total: ${totalPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</div>`;
+        }
+
+        const handleReviewSubmission = (event) => {
+            event.preventDefault();
+            const reviewText = document.getElementById('reviewText').value;
+            const reviewList = document.getElementById('reviewList');
+            const newReview = document.createElement('div');
+            newReview.textContent = reviewText;
+            newReview.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.2)"; /* Adding shadow to each review */
+            reviewList.appendChild(newReview);
+            document.getElementById('reviewForm').reset();
+        };
+
+        document.getElementById('reviewForm').addEventListener('submit', handleReviewSubmission);
+
+        const initApp = () => {
+            fetch('products.json')
+            .then(response => response.json())
+            .then(data => {
+                products = data;
+                if(localStorage.getItem('cart')){
+                    cart = JSON.parse(localStorage.getItem('cart'));
+                    addCartToHTML();
+                }
+            })
+        }
+        initApp();
+    </script>
+</body>
+</html>
